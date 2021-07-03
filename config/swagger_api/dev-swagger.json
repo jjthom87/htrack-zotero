@@ -1,0 +1,43 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Humanitrack Zotero API",
+    "description": "Humanitrack Zotero API",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "host": "",
+  "basePath": "/v1/api",
+  "tags": [
+    {
+      "name": "Records",
+      "description": "API for adding records to Google Sheets from Zotero"
+    }
+  ],
+  "schemes": [
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/records": {
+      "put": {
+        "tags": [
+          "Records"
+        ],
+        "summary": "Update Zotero Information",
+        "responses": {
+          "200": {
+            "description": "Event(s) Updated"
+          }
+        }
+      }
+    }
+  }
+}
