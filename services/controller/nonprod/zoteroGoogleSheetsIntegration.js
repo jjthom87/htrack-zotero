@@ -34,3 +34,21 @@ exports.addZoteroDataToGoogleSheets = function(callback){
 
   });
 }
+
+exports.getHumanitrackZoteroSheetValues = function(spreadsheetId, range, callback){
+  fs.readFile(path.join(__dirname, './../../../resources/credentials.json'), (err, content) => {
+    if (err){
+      console.log("Error retrieving google sheets api credentials file: " + err);
+    }
+
+    try {
+      googleSheetsApi.authorize(JSON.parse(content), (auth) => {
+          googleSheetsApi.getSheetValues(auth, spreadsheetId, range, function(res){
+            callback(res)
+          })
+      });
+    } catch (err){
+      callback(err)
+    }
+  });
+}

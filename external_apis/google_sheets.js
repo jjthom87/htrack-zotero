@@ -53,14 +53,18 @@ exports.appendToGoogleSheet = async function(auth, values, spreadsheetId, spread
   }
 }
 
-exports.getLastRowOfSheet = async function(auth, spreadsheetId, spreadsheetRange){
-  const sheets = google.sheets({ version: "v4", auth });
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: spreadsheetId,
-    range: spreadsheetRange,
-  }).execute().getValues().size();
+exports.getSheetValues = async function(auth, spreadsheetId, spreadsheetRange, callback){
+  try {
+    const sheets = google.sheets({ version: "v4", auth });
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: spreadsheetId,
+      range: spreadsheetRange,
+    });
 
-  return res;
+    callback(res.data.values);
+  } catch (err){
+    callback(err)
+  }
 }
 
 /**

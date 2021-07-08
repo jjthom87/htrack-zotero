@@ -34,7 +34,20 @@
         "summary": "Update Zotero Information",
         "responses": {
           "200": {
-            "description": "Event(s) Updated"
+            "description": "Sheets Updated"
+          }
+        }
+      }
+    },
+    "/records/main": {
+      "get": {
+        "tags": [
+          "Records"
+        ],
+        "summary": "Get Zotero Records from Main Sheet",
+        "responses": {
+          "200": {
+            "description": "Get Zotero Records"
           }
         }
       }
