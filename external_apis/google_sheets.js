@@ -3,8 +3,6 @@ const path = require('path');
 const readline = require('readline');
 const {google} = require('googleapis');
 
-const props = require('./../resources/application.json');
-
 // If modifying these scopes, delete token.json.
 const SCOPES = [
   'https://spreadsheets.google.com/feeds',
@@ -33,24 +31,12 @@ exports.authorize = async function(credentials, callback) {
   });
 }
 
-exports.appendToGoogleSheet = async function(auth, values, callback){
-  // const sheets = google.sheets({ version: "v4", auth });
+exports.appendToGoogleSheet = async function(auth, values, spreadsheetId, spreadsheetRange, callback){
   const sheets = google.sheets('v4');
-  // const authClient = await authorize();
   const request = {
-    // The ID of the spreadsheet to update.
-    spreadsheetId: props.sheets.mainPageSpreadsheetId,  // TODO: Update placeholder value.
-
-    // The A1 notation of a range to search for a logical table of data.
-    // Values are appended after the last row of the table.
-    range: props.sheets.mainPageRangeToAppendTo,  // TODO: Update placeholder value.
-
-    // How the input data should be interpreted.
-    valueInputOption: 'USER_ENTERED',  // TODO: Update placeholder value.
-
-    // How the input data should be inserted.
-    //insertDataOption: '',  // TODO: Update placeholder value.
-
+    spreadsheetId: spreadsheetId,
+    range: spreadsheetRange,
+    valueInputOption: 'USER_ENTERED',
     resource: {
       values: values
     },
@@ -62,8 +48,19 @@ exports.appendToGoogleSheet = async function(auth, values, callback){
     // TODO: Change code below to process the `response` object:
     callback({statusCode: 200, response: JSON.stringify(response, null, 2)});
   } catch (err) {
+    console.log(err)
     callback({statusCode: 422, response: err});
   }
+}
+
+exports.getLastRowOfSheet = async function(auth, spreadsheetId, spreadsheetRange){
+  const sheets = google.sheets({ version: "v4", auth });
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: spreadsheetId,
+    range: spreadsheetRange,
+  }).execute().getValues().size();
+
+  return res;
 }
 
 /**

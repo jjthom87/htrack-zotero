@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const googleSheetsApi = require("./../../../external_apis/google_sheets.js");
 const zoteroApi = require("./../../../external_apis/zotero.js");
+const props = require('./../../../resources/application.json');
 
 exports.addZoteroDataToGoogleSheets = function(callback){
   fs.readFile(path.join(__dirname, './../../../resources/credentials.json'), (err, content) => {
@@ -12,9 +13,19 @@ exports.addZoteroDataToGoogleSheets = function(callback){
     try {
       zoteroApi.getAndFormatZoteroData(function(res){
         googleSheetsApi.authorize(JSON.parse(content), (auth) => {
-            googleSheetsApi.appendToGoogleSheet(auth, res, function(response){
-              callback(response);
-            });
+            googleSheetsApi.appendToGoogleSheet(auth, res.allResults, props.sheets.mainPageSpreadsheetId, props.sheets.mainPageRangeToAppendTo, function(mainRes){
+              if(mainRes.statusCode == 200){
+                googleSheetsApi.appendToGoogleSheet(auth, res.creators, props.sheets.creatorsPageSpreadsheetId, props.sheets.creatorsPageRangeToAppendTo, function(creatorsRes){
+                  if(creatorsRes.statusCode == 200){
+                    callback({statusCode: 200, statusMessage: "records successfully added to google sheets"})
+                  } else {
+                    callback({statusCode: 422, statusMessage: "Add to google sheets unsuccessful."})
+                  }
+                })
+              } else {
+                callback({statusCode: 422, statusMessage: "Add to google sheets unsuccessful."})
+              }
+            })
         });
       });
     } catch (err) {
