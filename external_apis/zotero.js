@@ -13,11 +13,8 @@ function callZoteroApi(){
 exports.getAndFormatZoteroData = async function(callback) {
   const result = await callZoteroApi();
 
-  const mainColumns = ["key", "version", "itemType", "title", "abstractNote", "publicationTitle", "volume", "issue", "pages", "date", "DOI", "ISSN"];
-  const creatorColumns = ["key", "type", "name"]
-
-  const allResults = [mainColumns];
-  const creators = [creatorColumns];
+  const allResults = [];
+  const creators = [];
 
 
   for(var i = 0; i < result.raw.length; i++){

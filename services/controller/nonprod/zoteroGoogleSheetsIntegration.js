@@ -13,11 +13,11 @@ exports.addZoteroDataToGoogleSheets = function(callback){
     try {
       zoteroApi.getAndFormatZoteroData(function(res){
         googleSheetsApi.authorize(JSON.parse(content), (auth) => {
-            googleSheetsApi.appendToGoogleSheet(auth, res.allResults, props.sheets.mainPageSpreadsheetId, props.sheets.mainPageRangeToAppendTo, function(mainRes){
+            googleSheetsApi.appendToGoogleSheet(auth, res.allResults, props.sheets.mainPageSpreadsheetId, props.sheets.mainPageRangeToAppendTo, props.sheets.mainPageRangeToGet, function(mainRes){
               if(mainRes.statusCode == 200){
-                googleSheetsApi.appendToGoogleSheet(auth, res.creators, props.sheets.creatorsPageSpreadsheetId, props.sheets.creatorsPageRangeToAppendTo, function(creatorsRes){
+                googleSheetsApi.appendToGoogleSheet(auth, res.creators, props.sheets.creatorsPageSpreadsheetId, props.sheets.creatorsPageRangeToAppendTo, props.sheets.creatorsPageRangeToGet, function(creatorsRes){
                   if(creatorsRes.statusCode == 200){
-                    callback({statusCode: 200, statusMessage: "records successfully added to google sheets"})
+                    callback({statusCode: 200, statusMessage: "records successfully added to google sheets. Main Records Added: " + mainRes.recordsAdded + ", Creator Records Added: " + creatorsRes.recordsAdded})
                   } else {
                     callback({statusCode: 422, statusMessage: "Add to google sheets unsuccessful."})
                   }
@@ -43,7 +43,7 @@ exports.getHumanitrackZoteroSheetValues = function(spreadsheetId, range, callbac
 
     try {
       googleSheetsApi.authorize(JSON.parse(content), (auth) => {
-          googleSheetsApi.getSheetValues(auth, spreadsheetId, range, function(res){
+          googleSheetsApi.getAllSpreadsheetValues(auth, spreadsheetId, range, function(res){
             callback(res)
           })
       });

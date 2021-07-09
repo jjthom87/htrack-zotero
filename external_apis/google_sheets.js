@@ -3,10 +3,13 @@ const path = require('path');
 const readline = require('readline');
 const {google} = require('googleapis');
 
+const constants = require("./../config/constants.js");
+
 // If modifying these scopes, delete token.json.
 const SCOPES = [
   'https://spreadsheets.google.com/feeds',
-  'https://www.googleapis.com/auth/drive'
+  'https://www.googleapis.com/auth/drive',
+  'https://www.googleapis.com/auth/spreadsheets.readonly'
 ];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
@@ -31,29 +34,41 @@ exports.authorize = async function(credentials, callback) {
   });
 }
 
-exports.appendToGoogleSheet = async function(auth, values, spreadsheetId, spreadsheetRange, callback){
-  const sheets = google.sheets('v4');
-  const request = {
-    spreadsheetId: spreadsheetId,
-    range: spreadsheetRange,
-    valueInputOption: 'USER_ENTERED',
-    resource: {
-      values: values
-    },
-    auth: auth
-  };
+exports.appendToGoogleSheet = async function(auth, valuesToBeAdded, spreadsheetId, spreadsheetRangeToAddTo, spreadsheetRangeToGet, callback){
+  await getSheetValues(auth, spreadsheetId, spreadsheetRangeToGet, function(allSheetValues){
 
-  try {
-    const response = (await sheets.spreadsheets.values.append(request)).data;
-    // TODO: Change code below to process the `response` object:
-    callback({statusCode: 200, response: JSON.stringify(response, null, 2)});
-  } catch (err) {
-    console.log(err)
-    callback({statusCode: 422, response: err});
-  }
+    const formattedInputValues = formatSpreadsheetValues(valuesToBeAdded, spreadsheetRangeToGet);
+
+    const newValues = checkForDuplicateValues(formattedInputValues, allSheetValues, valuesToBeAdded);
+
+    const sheets = google.sheets('v4');
+    const request = {
+      spreadsheetId: spreadsheetId,
+      range: spreadsheetRangeToAddTo,
+      valueInputOption: 'USER_ENTERED',
+      resource: {
+        values: newValues
+      },
+      auth: auth
+    };
+
+    try {
+      const response = (sheets.spreadsheets.values.append(request)).data;
+      callback({statusCode: 200, response: JSON.stringify(response, null, 2), recordsAdded: newValues.length});
+    } catch (err) {
+      callback({statusCode: 422, response: err});
+    }
+
+  });
 }
 
-exports.getSheetValues = async function(auth, spreadsheetId, spreadsheetRange, callback){
+exports.getAllSpreadsheetValues = async function(auth, spreadsheetId, spreadsheetRange, callback){
+  getSheetValues(auth, spreadsheetId, spreadsheetRange, function(res){
+    callback(res)
+  })
+}
+
+async function getSheetValues(auth, spreadsheetId, spreadsheetRange, callback){
   try {
     const sheets = google.sheets({ version: "v4", auth });
     const res = await sheets.spreadsheets.values.get({
@@ -61,10 +76,20 @@ exports.getSheetValues = async function(auth, spreadsheetId, spreadsheetRange, c
       range: spreadsheetRange,
     });
 
-    callback(res.data.values);
+    callback(formatSpreadsheetValues(res.data.values, spreadsheetRange));
   } catch (err){
     callback(err)
   }
+}
+
+async function getSheetTotalPopulatedRows(auth){
+  const sheets = google.sheets({ version: "v4", auth });
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: spreadsheetId,
+    range: spreadsheetRange,
+  }).execute().getValues().size();
+
+  return res;
 }
 
 /**
@@ -98,4 +123,33 @@ function getNewToken(oAuth2Client, callback) {
       callback(oAuth2Client);
     });
   });
+}
+
+function formatSpreadsheetValues(spreadsheetValues, spreadsheetType){
+  const sheetColumns = spreadsheetType.includes("Main") ? constants.mainColumns : constants.creatorColumns;
+
+  const formattedValues = [];
+  for(var i = 0; i < spreadsheetValues.length; i++){
+    let row = spreadsheetValues[i];
+    let rowObject = {};
+    for(var j = 0; j < row.length; j++){
+      rowObject[sheetColumns[j]] = row[j];
+      if(j == (row.length - 1)){
+        formattedValues.push(rowObject)
+      }
+    }
+  }
+  return formattedValues;
+}
+
+function checkForDuplicateValues(formattedValuesToBeAdded, currentValues, valuesToBeAdded){
+  const currentKeys = currentValues.map((value) => value.key);
+  const newValues = [];
+  for(var i = 0; i < formattedValuesToBeAdded.length; i++){
+    if(!currentKeys.includes(formattedValuesToBeAdded[i].key)){
+      newValues.push(valuesToBeAdded[i])
+    }
+  }
+
+  return newValues;
 }
