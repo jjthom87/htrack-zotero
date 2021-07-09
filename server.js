@@ -12,6 +12,15 @@ var PORT = process.env.PORT || 7000;
 
 apiConfig.setSwagger(app);
 resourcesConfig.setResourceFiles();
+
+app.get('/', (req,res) => {
+  res.send("<h2><a href='/api-docs'>To Api</a></h2>")
+});
+
 app.use('/v1', require(path.join(__dirname, `/services/router/nonprod/zoteroGoogleSheetsIntegration.js`)));
 
-app.listen(PORT);
+setTimeout(() => {
+  app.listen(PORT, () => {
+    console.log(`Humanitrack Zotero App Running`)
+  })
+}, 10000)
