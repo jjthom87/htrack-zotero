@@ -5,15 +5,15 @@ const aws = require('aws-sdk');
 const s3 = new aws.S3();
 const BUCKET = process.env.S3_BUCKET_NAME;
 
-const logger = require('./../logging/logger.js');
-const resourcesDir = __dirname + "/../../resources";
+const logger = require('./logger.js');
+const resourcesDir = __dirname + "/../resources";
 
 exports.setResourceFiles = () => {
   if (!fs.existsSync(resourcesDir)){
     fs.mkdirSync(resourcesDir);
   }
 
-  var secretsFiles = ["application.json", "credentials.json"];
+  var secretsFiles = ["application.json", "credentials.json", "token.json"];
   secretsFiles.forEach((file) => {
     if (!fs.existsSync(path.join(resourcesDir, file))) {
       s3.getObject({

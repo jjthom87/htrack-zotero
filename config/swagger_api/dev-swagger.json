@@ -31,10 +31,10 @@
         "tags": [
           "Records"
         ],
-        "summary": "Update Zotero Information",
+        "summary": "Update Zotero Information in Google Sheets",
         "responses": {
           "200": {
-            "description": "Sheets Updated"
+            "description": "Update Zotero Information in Google Sheets"
           }
         }
       }
@@ -47,7 +47,7 @@
         "summary": "Get Zotero Records from Main Sheet",
         "responses": {
           "200": {
-            "description": "Get Zotero Records"
+            "description": "Get Zotero Records for Main Sheet"
           }
         }
       }
