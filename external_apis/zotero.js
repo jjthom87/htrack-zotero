@@ -15,7 +15,7 @@ exports.getAndFormatZoteroData = async function(callback) {
 
   const allResults = [];
   const creators = [];
-
+  const tags = [];
 
   for(var i = 0; i < result.raw.length; i++){
     var data = result.raw[i].data;
@@ -23,6 +23,7 @@ exports.getAndFormatZoteroData = async function(callback) {
       allResults.push([data["key"], data["version"], data["itemType"], data["title"], data["abstractNote"], data["publicationTitle"], data["volume"], data["issue"], data["pages"], data["date"], data["DOI"], data["ISSN"]])
 
       const creatorsData = data["creators"];
+      const tagsData = data["tags"];
 
       for(var j = 0; j < creatorsData.length; j++){
         let creator = [];
@@ -33,8 +34,16 @@ exports.getAndFormatZoteroData = async function(callback) {
         creators.push(creator);
       }
 
+      for(var j = 0; j < tagsData.length; j++){
+        let tag = [];
+        tag.push(data["key"]);
+        tag.push(tagsData[j].tag);
+
+        tags.push(tag);
+      }
+
     }
 
   }
-  callback({allResults: allResults, creators: creators});
+  callback({allResults: allResults, creators: creators, tags: tags});
 }

@@ -4,6 +4,7 @@ const readline = require('readline');
 const {google} = require('googleapis');
 
 const constants = require("./../config/constants.js");
+const spreadsheetId = require("./../resources/application.json").sheets.playgroundSpreadsheetId;
 
 // If modifying these scopes, delete token.json.
 const SCOPES = [
@@ -34,8 +35,8 @@ exports.authorize = async function(credentials, callback) {
   });
 }
 
-exports.appendToGoogleSheet = async function(auth, valuesToBeAdded, spreadsheetId, spreadsheetRangeToAddTo, spreadsheetRangeToGet, callback){
-  await getSheetValues(auth, spreadsheetId, spreadsheetRangeToGet, function(allSheetValues){
+exports.appendToGoogleSheet = async function(auth, valuesToBeAdded, spreadsheetRangeToAddTo, spreadsheetRangeToGet, callback){
+  await getSheetValues(auth, spreadsheetRangeToGet, function(allSheetValues){
 
     const formattedInputValues = formatSpreadsheetValues(valuesToBeAdded, spreadsheetRangeToGet);
 
@@ -62,13 +63,13 @@ exports.appendToGoogleSheet = async function(auth, valuesToBeAdded, spreadsheetI
   });
 }
 
-exports.getAllSpreadsheetValues = async function(auth, spreadsheetId, spreadsheetRange, callback){
-  getSheetValues(auth, spreadsheetId, spreadsheetRange, function(res){
+exports.getAllSpreadsheetValues = async function(auth, spreadsheetRange, callback){
+  getSheetValues(auth, spreadsheetRange, function(res){
     callback(res)
   })
 }
 
-async function getSheetValues(auth, spreadsheetId, spreadsheetRange, callback){
+async function getSheetValues(auth, spreadsheetRange, callback){
   try {
     const sheets = google.sheets({ version: "v4", auth });
     const res = await sheets.spreadsheets.values.get({
@@ -126,16 +127,25 @@ function getNewToken(oAuth2Client, callback) {
 }
 
 function formatSpreadsheetValues(spreadsheetValues, spreadsheetType){
-  const sheetColumns = spreadsheetType.includes("Main") ? constants.mainColumns : constants.creatorColumns;
+  let sheetColumns;
+  if(spreadsheetType.includes("Main")){
+    sheetColumns = constants.mainColumns;
+  } else if (spreadsheetType.includes("Creators")){
+    sheetColumns = constants.creatorColumns;
+  } else {
+    sheetColumns = constants.tagColumns;
+  }
 
   const formattedValues = [];
-  for(var i = 0; i < spreadsheetValues.length; i++){
-    let row = spreadsheetValues[i];
-    let rowObject = {};
-    for(var j = 0; j < row.length; j++){
-      rowObject[sheetColumns[j]] = row[j];
-      if(j == (row.length - 1)){
-        formattedValues.push(rowObject)
+  if(spreadsheetValues){
+    for(var i = 0; i < spreadsheetValues.length; i++){
+      let row = spreadsheetValues[i];
+      let rowObject = {};
+      for(var j = 0; j < row.length; j++){
+        rowObject[sheetColumns[j]] = row[j];
+        if(j == (row.length - 1)){
+          formattedValues.push(rowObject)
+        }
       }
     }
   }
@@ -143,6 +153,9 @@ function formatSpreadsheetValues(spreadsheetValues, spreadsheetType){
 }
 
 function checkForDuplicateValues(formattedValuesToBeAdded, currentValues, valuesToBeAdded){
+  if(currentValues == undefined){
+    return valuesToBeAdded;
+  }
   const currentKeys = currentValues.map((value) => value.key);
   const newValues = [];
   for(var i = 0; i < formattedValuesToBeAdded.length; i++){

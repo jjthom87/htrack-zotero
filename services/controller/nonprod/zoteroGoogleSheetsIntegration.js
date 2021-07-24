@@ -13,11 +13,19 @@ exports.addZoteroDataToGoogleSheets = function(callback){
     try {
       zoteroApi.getAndFormatZoteroData(function(res){
         googleSheetsApi.authorize(JSON.parse(content), (auth) => {
-            googleSheetsApi.appendToGoogleSheet(auth, res.allResults, props.sheets.mainPageSpreadsheetId, props.sheets.mainPageRangeToAppendTo, props.sheets.mainPageRangeToGet, function(mainRes){
+            googleSheetsApi.appendToGoogleSheet(auth, res.allResults, props.sheets.mainPageRangeToAppendTo, props.sheets.mainPageRangeToGet, function(mainRes){
               if(mainRes.statusCode == 200){
-                googleSheetsApi.appendToGoogleSheet(auth, res.creators, props.sheets.creatorsPageSpreadsheetId, props.sheets.creatorsPageRangeToAppendTo, props.sheets.creatorsPageRangeToGet, function(creatorsRes){
+                googleSheetsApi.appendToGoogleSheet(auth, res.creators, props.sheets.creatorsPageRangeToAppendTo, props.sheets.creatorsPageRangeToGet, function(creatorsRes){
                   if(creatorsRes.statusCode == 200){
-                    callback({statusCode: 200, statusMessage: "records successfully added to google sheets. Main Records Added: " + mainRes.recordsAdded + ", Creator Records Added: " + creatorsRes.recordsAdded})
+                    googleSheetsApi.appendToGoogleSheet(auth, res.tags, props.sheets.tagsPageRangeToAppendTo, props.sheets.tagsPageRangeToGet, function(tagsRes){
+                      if(tagsRes.statusCode == 200){
+                        const totalAdded = mainRes.recordsAdded + creatorsRes.recordsAdded + tagsRes.recordsAdded;
+                        const statusMessage = totalAdded > 0 ? `records successfully added to google sheets. Main Records Added: ${mainRes.recordsAdded}, Creator Records Added: ${creatorsRes.recordsAdded}, Tags Records Added: ${tagsRes.recordsAdded}` : "No records added to google sheets"
+                        callback({statusCode: 200, statusMessage: statusMessage})
+                      } else {
+                        callback({statusCode: 422, statusMessage: "Add to google sheets unsuccessful."})
+                      }
+                    });
                   } else {
                     callback({statusCode: 422, statusMessage: "Add to google sheets unsuccessful."})
                   }
@@ -35,7 +43,7 @@ exports.addZoteroDataToGoogleSheets = function(callback){
   });
 }
 
-exports.getHumanitrackZoteroSheetValues = function(spreadsheetId, range, callback){
+exports.getHumanitrackZoteroSheetValues = function(range, callback){
   fs.readFile(path.join(__dirname, './../../../resources/credentials.json'), (err, content) => {
     if (err){
       console.log("Error retrieving google sheets api credentials file: " + err);
@@ -43,7 +51,7 @@ exports.getHumanitrackZoteroSheetValues = function(spreadsheetId, range, callbac
 
     try {
       googleSheetsApi.authorize(JSON.parse(content), (auth) => {
-          googleSheetsApi.getAllSpreadsheetValues(auth, spreadsheetId, range, function(res){
+          googleSheetsApi.getAllSpreadsheetValues(auth, range, function(res){
             callback(res)
           })
       });
