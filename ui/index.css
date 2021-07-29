@@ -40,6 +40,10 @@ table, tr, td, th {
   cursor: pointer;
 }
 
-#close-abstract-modal {
+#close-modal {
   cursor: pointer;
+}
+
+#modal-title {
+  text-align: center;
 }

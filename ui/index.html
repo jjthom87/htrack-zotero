@@ -11,7 +11,8 @@
     <div class="table">
       <table>
         <thead>
-          <th>Key</th>
+          <th>Title</th>
+          <th>Publication Title</th>
           <th>DOI</th>
           <th>ISSN</th>
           <th>Abstract Note</th>
@@ -19,23 +20,21 @@
           <th>Issue</th>
           <th>Item Type</th>
           <th>Pages</th>
-          <th>Publication Title</th>
-          <th>Title</th>
           <th>Version</th>
           <th>Volume</th>
+          <th>Creators</th>
+          <th>Tags</th>
         </thead>
         <tbody>
-
         </tbody>
       </table>
     </div>
 
-    <!-- The Modal -->
-    <div id="abstract-note-modal" class="modal">
-      <!-- Modal content -->
-      <div id="abstract-note-modal-content" class="modal-content">
-        <span id="close-abstract-modal" class="close-modal">&times;</span>
-        <p id="abstract-note-text"></p>
+    <div id="modal" class="modal">
+      <div id="modal-content" class="modal-content">
+        <span id="close-modal" class="close-modal">&times;</span>
+        <strong><p id="modal-title"></p></strong>
+        <div id="modal-body"></div>
       </div>
     </div>
 

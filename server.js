@@ -24,4 +24,4 @@ setTimeout(() => {
   app.listen(PORT, () => {
     console.log(`Humanitrack Zotero App Running`)
   })
-}, 10000)
+}, 2500)
