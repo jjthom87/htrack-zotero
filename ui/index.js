@@ -71,12 +71,12 @@ function creatorsModalEvents(res){
       res.then(function(creators){
         const recordCreators = creators.data.filter((data) => data.key == key);
 
-        let tableString = "<ol>";
+        let listString = "<ol>";
         recordCreators.forEach((creator) => {
-          tableString += "<li>" + creator.name + "</li>"
+          listString += "<li>" + creator.name + "</li>"
         });
 
-        document.getElementById("modal-body").innerHTML = tableString + "</ol>";
+        document.getElementById("modal-body").innerHTML = listString + "</ol>";
         document.getElementById("modal-title").textContent = "Creators";
         document.getElementById("modal").style.display = "block";
 
@@ -86,10 +86,34 @@ function creatorsModalEvents(res){
   });
 }
 
+function tagsModalEvents(res){
+  document.body.addEventListener('click',function(e){
+    if(e.target && e.target.className == 'view-tags'){
+      const key = e.target.getAttribute("key");
+
+      res.then(function(tags){
+        const recordTags = tags.data.filter((data) => data.key == key);
+
+        let listString = "<ol>";
+        recordTags.forEach((tag) => {
+          listString += "<li>" + tag.tag + "</li>"
+        });
+
+        document.getElementById("modal-body").innerHTML = listString + "</ol>";
+        document.getElementById("modal-title").textContent = "Tags";
+        document.getElementById("modal").style.display = "block";
+
+      });
+    }
+    closeModal(e, 'view-tags')
+  });
+}
+
 function runAll(){
   populateTableRecords();
   abstractNoteModalEvents(getRecords("main"));
   creatorsModalEvents(getRecords("creators"));
+  tagsModalEvents(getRecords("tags"));
 }
 
 runAll();

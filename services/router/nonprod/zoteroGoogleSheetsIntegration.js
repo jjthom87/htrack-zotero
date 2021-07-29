@@ -11,14 +11,9 @@ router.put('/api/records', (req,res) => {
   });
 });
 
-router.get('/api/records/main', (req,res) => {
-  zoteroGoogleSheetsIntegrationService.getHumanitrackZoteroSheetValues(props.sheets.mainPageRangeToGet, function(response){
-    res.json(response);
-  });
-});
-
-router.get('/api/records/creators', (req,res) => {
-  zoteroGoogleSheetsIntegrationService.getHumanitrackZoteroSheetValues(props.sheets.creatorsPageRangeToGet, function(response){
+router.get('/api/records/:page', (req,res) => {
+  const page = req.params.page == "main" ? props.sheets.mainPageRangeToGet : req.params.page == "creators" ? props.sheets.creatorsPageRangeToGet : props.sheets.tagsPageRangeToGet;
+  zoteroGoogleSheetsIntegrationService.getHumanitrackZoteroSheetValues(page, function(response){
     res.json(response);
   });
 });
