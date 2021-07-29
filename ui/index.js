@@ -9,7 +9,7 @@ const getRecords = async function(api) {
 }
 
 function closeModal(e, buttonId){
-  if(e.target && e.target.className != buttonId){
+  if(e.target && !e.target.className.includes("view")){
     document.getElementById("modal").style.display = "none";
   }
   document.getElementById("close-modal").addEventListener('click', function(e){
